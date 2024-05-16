@@ -2,49 +2,67 @@ import { useState } from "react";
 import "./App.css";
 
 function App() {
-  const initialState = [
-    { id: 1, name: "John", age: 20 },
-    { id: 2, name: "Doe", age: 21 },
-  ];
-  const [users, setUsers] = useState(initialState);
+  const [todos, setTodos] = useState([]);
 
-  // 이름과 나이를 각각 상태로 정의하세요. 초기값은 빈문자열("")입니다.
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
+  const [title, setTitle] = useState("");
+  const [text, setText] = useState("");
 
-  const addUser = (e) => {
+  const addTodo = (e) => {
     e.preventDefault();
-    // 이름과 나이가 모두 입력되지 않았을 때는 alert 처리하고 함수를 종료하세요. 논리합연산자 (||) 를 이용하세요.
-    if (!name || !age) {
-      alert("이름과 나이를 입력해주세요.");
+    if (!title || !text) {
+      alert("제목과 내용을 입력해주세요.");
       return;
     }
-    // 사용자 리스트 상태를 업데이트 하세요. spread operator 를 사용하고, 추가되는 id는 현재 시간을 밀리초 단위로 반환하는 Date.now() 를 사용하세요.
-    setUsers([...users, { id: Date.now(), name, age: parseInt(age) }]);
-    // 입력 후에 입력창 초기화
-    setName("");
-    setAge("");
+    setTodos([...todos, { id: Date.now(), title, text, status: "working" }]);
+    setTitle("");
+    setText("");
   };
 
-  const removeUser = (id) => {
-    // filter 메소드를 사용해서 사용자 삭제 로직을 구현해 보세요.
-    setUsers(users.filter(user => user.id !== id));
+  const removeTodo = (id) => {
+    setTodos(todos.filter(todo => todo.id !== id));
+  };
+
+  const toggleStatus = (id) => {
+    setTodos(todos.map(todo => {
+      if (todo.id === id) {
+        return { ...todo, status: todo.status === "working" ? "Done!" : "working" };
+      }
+      return todo;
+    }));
+  };
+
+  const toggleIncomplete = (id) => {
+    setTodos(todos.map(todo => {
+      if (todo.id === id && todo.status === "Done!") {
+        return { ...todo, status: "working" };
+      }
+      return todo;
+    }));
   };
 
   return (
     <>
-      <h1>사용자 리스트</h1>
-      <form onSubmit={addUser}>
-        {/* input 태그에 value, onChange 속성을 추가해서 이름과 나이의 상태와 상태변경 로직을 연결하세요 */}
-        <input type="text" placeholder="이름" value={name} onChange={(e) => setName(e.target.value)} />
-        <input type="number" placeholder="나이" value={age} onChange={(e) => setAge(e.target.value)} />
-        <button type="submit">사용자 추가</button>
+      <h1>ToDo 리스트</h1>
+      <form onSubmit={addTodo}>
+        <input type="text" placeholder="제목" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <input type="text" placeholder="내용" value={text} onChange={(e) => setText(e.target.value)} />
+        <button type="submit">등록</button>
       </form>
       <ul>
-        {/* map 메소드를 이용해서 user 리스트를 렌더링하세요.  */}
-        {users.map(user => (
-          <li key={user.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            이름: {user.name}, 나이: {user.age} <button onClick={() => removeUser(user.id)}>삭제</button>
+        {todos.map(todo => (
+          <li key={todo.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <span style={{ marginRight: '10px' }}>제목: {todo.title}, 내용: {todo.text}</span>
+              {todo.status === "Done!" ? (
+                <>
+                  <span style={{ color: 'green' }}>{todo.status}</span>
+                  <button onClick={() => toggleIncomplete(todo.id)}>미완료</button>
+                </>
+              ) : (
+                <button onClick={() => toggleStatus(todo.id)}>완료</button>
+              )}
+            </div>
+            <button onClick={() => removeTodo(todo.id)}>삭제</button>
           </li>
         ))}
       </ul>
